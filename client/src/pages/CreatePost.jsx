@@ -16,7 +16,7 @@ const CreatePost = () => {
 
   const [generatingImg, setGeneratingImg] = useState(false);
   const [loading, setLoading] = useState(false);
-
+  const [error,setError] = useState("");
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSurpriseMe = () => {
@@ -27,8 +27,9 @@ const CreatePost = () => {
   const generateImage = async () => {
     if (form.prompt) {
       try {
+        setError("");
         setGeneratingImg(true);
-        const response = await fetch('https://ai-image-dall-e.onrender.com/api/v1/dalle', {
+        const response = await fetch('http://localhost:8080/api/v1/dalle', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -41,12 +42,14 @@ const CreatePost = () => {
         const data = await response.json();
         setForm({ ...form, photo: `data:image/jpeg;base64,${data.photo}` });
       } catch (err) {
-        alert(err);
+        //alert(err);
+        setError("Sorry API is not able to handle requests. Please try again after some time")
       } finally {
         setGeneratingImg(false);
       }
     } else {
-      alert('Please provide proper prompt');
+      //alert('Please provide proper prompt');
+      setError('Please provide proper idea for AI input field');
     }
   };
 
@@ -55,6 +58,7 @@ const CreatePost = () => {
 
     if (form.prompt && form.photo) {
       setLoading(true);
+      setError("");
       try {
         const response = await fetch('https://ai-image-dall-e.onrender.com/api/v1/post', {
           method: 'POST',
@@ -68,12 +72,14 @@ const CreatePost = () => {
         //alert('Success');
         navigate('/');
       } catch (err) {
-        alert(err);
+        //alert(err);
+        setError("Sorry API is not able to handle requests. Please try again after some time");
       } finally {
         setLoading(false);
       }
     } else {
-      alert('Please generate an image with proper details');
+      //alert('Please generate an image with proper details');
+      setError('Please generate an image with proper details');
     }
   };
 
@@ -83,8 +89,8 @@ const CreatePost = () => {
         <h1 className="font-extrabold text-[#222328] text-[32px]">Create</h1>
         <p className="mt-2 text-[#666e75] text-[14px] max-w-[500px]">Generate an imaginative image through DALL-E AI and share it with the community</p>
       </div>
-
       <form className="mt-16 max-w-3xl" onSubmit={handleSubmit}>
+        <p className='text-[red]'>{error}</p>
         <div className="flex flex-col gap-5">
           <FormField
             labelName="Your Name"
